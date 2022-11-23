@@ -1,5 +1,7 @@
 package ReversiGame;
 
+import java.util.ArrayList;
+
 import static ReversiGame.Constants.*;
 
 /**
@@ -8,6 +10,7 @@ import static ReversiGame.Constants.*;
 public class PlayingField {
     private int[][] playingField;
     private boolean colorOfMove;
+    private ArrayList<ArrayList<Integer>> possibleCellsToMove;
 
     private Player player1;
     private Player player2;  // Для режима игры игрок-игрок
@@ -44,14 +47,16 @@ public class PlayingField {
      * Создает новую игру с чистым полем и инициализирует нужные переменные
      */
     public void createNewGame() {
+        colorOfMove = REVERSI_BLACK_TURN;
         clearPlayingField();
+        possibleCellsToMove = MoveCalculator.getAllPossibleCellsToMove(playingField, colorOfMove);
     }
 
     /**
      * Переводит двумерный массив из переменной playingField в двумерную строку
      */
     public String renderPlayingFieldIntoString() {
-        StringBuilder resultRenderedString = new StringBuilder(new String());
+        StringBuilder resultRenderedString = new StringBuilder();
         resultRenderedString.append('\t');
 
         for (int horizontalPositionSymbol = (int)'A'; horizontalPositionSymbol < (int)'I'; ++horizontalPositionSymbol) {
@@ -90,12 +95,14 @@ public class PlayingField {
 
     /**
      * Ставит на позицию новую фишку цвета текущего хода и меняет ход.
-     * @param pos_x позиция новой фишки по горизонтали
-     * @param pos_y позиция новой фишки по вертикали
+     * @param posX позиция новой фишки по горизонтали
+     * @param posY позиция новой фишки по вертикали
      * @return возвращает строку ошибки или константу SUCCESSFUL_FUNCTION_COMPLETION при
      *         успешном ходе
      */
-    public String makeMoveOnPosition(int pos_x, int pos_y) {
+    public String makeMoveOnPosition(int posX, int posY) {
+
+
         return "function 'makeMoveOnPosition' hadn't implemented yet";
     }
 }

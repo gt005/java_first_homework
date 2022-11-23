@@ -1,6 +1,6 @@
 package ReversiGame;
 
-public class Constants {
+public final class Constants {
     public static final boolean REVERSI_BLACK_TURN = false;
     public static final boolean REVERSI_WHITE_TURN = true;
     public static final String SUCCESSFUL_FUNCTION_COMPLETION = "success";
