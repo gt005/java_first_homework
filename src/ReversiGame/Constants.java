@@ -7,7 +7,7 @@ public final class Constants {
 
     // Число ходов, которые будут просчитываться AI наперед
     public static final int LEVEL_OF_COMPLEXITY = 3;
-    public static final String GAME_RULES = "Тут описать правила игры";
+    public static final String GAME_RULES = "Чтобы начать игру, напишите start";
     public static final int EMPTY_CELL = 0;
     public static final int WHITE_CELL = 1;
     public static final int BLACK_CELL = 2;

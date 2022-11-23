@@ -98,10 +98,13 @@ public final class MoveCalculator {
      * @param colorOfMove задает цвет фишек игрока, чей ход
      * @param positionX позиция фишки по горизонтали
      * @param positionY позиция фишки по вертикали
+     * @return количество перевернутых фишек
      */
-    public static void invertChipsDiagonally(int[][] playingField, boolean colorOfMove, int positionX, int positionY) {
+    public static int invertChipsDiagonally(int[][] playingField, boolean colorOfMove, int positionX, int positionY) {
         int enemyChipColor = (colorOfMove == REVERSI_BLACK_TURN) ? WHITE_CELL : BLACK_CELL;
         int unionChipColor = (colorOfMove == REVERSI_BLACK_TURN) ? BLACK_CELL : WHITE_CELL;
+
+        int invertedChipsAmount = 0;
 
         // Перебор направлений
         for (int xDirection = -1; xDirection <= 1; ++xDirection) {
@@ -114,12 +117,14 @@ public final class MoveCalculator {
                     while (isPositionOnTheBoard(tmpXPosition, tmpYPosition) &&
                             (playingField[tmpYPosition][tmpXPosition] == enemyChipColor)) {
                         playingField[tmpYPosition][tmpXPosition] = unionChipColor;
+                        invertedChipsAmount++;
                         tmpYPosition += yDirection;
                         tmpXPosition += xDirection;
                     }
                 }
             }
         }
+        return invertedChipsAmount;
     }
 
     /**

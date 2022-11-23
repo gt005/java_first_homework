@@ -11,10 +11,26 @@ public class PlayingField {
     private int[][] playingField;
     private boolean colorOfMove;
 
+    private ArrayList<ArrayList<Integer>> possibleCellsToMove;
+
+    private int[] gameScore;
+
     private Player player1;
     private Player player2;  // Для режима игры игрок-игрок
 
     private boolean gameStarted;
+
+    public int[] getGameScore() {
+        return gameScore;
+    }
+
+    public boolean checkPossibilityOfMove() {
+        return !possibleCellsToMove.isEmpty();
+    }
+
+    public void changeTurn() {
+        colorOfMove = !colorOfMove;
+    }
 
     public boolean isGameStarted() {
         return gameStarted;
@@ -48,6 +64,8 @@ public class PlayingField {
     public void createNewGame() {
         colorOfMove = REVERSI_BLACK_TURN;
         clearPlayingField();
+        gameScore = new int[]{2, 2};
+        possibleCellsToMove = MoveCalculator.getAllPossibleCellsToMove(playingField, colorOfMove);
     }
 
     /**
@@ -65,8 +83,6 @@ public class PlayingField {
         }
 
         resultRenderedString.append('\n');
-
-        ArrayList<ArrayList<Integer>> possibleCellsToMove = MoveCalculator.getAllPossibleCellsToMove(playingField, colorOfMove);
 
         for (int y = 0; y < 8; ++y) {
             resultRenderedString.append(y + 1);
@@ -105,9 +121,26 @@ public class PlayingField {
      * @param positionX позиция новой фишки по горизонтали
      * @param positionY позиция новой фишки по вертикали
      */
-    public void makeMoveOnPosition(int positionX, int positionY) {
-        MoveCalculator.invertChipsDiagonally(playingField, colorOfMove, positionX, positionY);
+    public String makeMoveOnPosition(int positionX, int positionY) {
+        ArrayList<Integer> arrayToFind = new ArrayList<>();
+        arrayToFind.add(positionX);
+        arrayToFind.add(positionY);
+        if (!possibleCellsToMove.contains(arrayToFind)) {
+            return "На эту клетку нельзя ходить по правилам игры. Все возможные ходы указаны галочкой.";
+        }
+
+        int scoreChange = MoveCalculator.invertChipsDiagonally(playingField, colorOfMove, positionX, positionY);
+        if (colorOfMove == REVERSI_BLACK_TURN) {
+            gameScore[0] += scoreChange + 1;
+            gameScore[1] -= scoreChange;
+        } else {
+            gameScore[0] -= scoreChange;
+            gameScore[1] += scoreChange + 1;
+        }
+
         playingField[positionY][positionX] = (colorOfMove == REVERSI_BLACK_TURN) ? BLACK_CELL : WHITE_CELL;
         colorOfMove = !colorOfMove;
+        possibleCellsToMove = MoveCalculator.getAllPossibleCellsToMove(playingField, colorOfMove);
+        return SUCCESSFUL_FUNCTION_COMPLETION;
     }
 }
