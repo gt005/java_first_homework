@@ -55,7 +55,7 @@ public class PlayingField {
     /**
      * Переводит двумерный массив из переменной playingField в двумерную строку
      */
-    public String renderPlayingFieldIntoString() {
+    public static String renderPlayingFieldIntoString(int[][] playingField) {
         StringBuilder resultRenderedString = new StringBuilder();
         resultRenderedString.append('\t');
 
@@ -101,7 +101,13 @@ public class PlayingField {
      *         успешном ходе
      */
     public String makeMoveOnPosition(int posX, int posY) {
-
+        for (int xDirection = -1; xDirection <= 1; ++xDirection) {
+            for (int yDirection = -1; yDirection <= 1; ++yDirection) {
+                if ((xDirection == yDirection) && (yDirection == 0)) {
+                    continue;
+                }
+            }
+        }
 
         return "function 'makeMoveOnPosition' hadn't implemented yet";
     }
