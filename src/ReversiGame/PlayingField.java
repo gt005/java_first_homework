@@ -1,12 +1,22 @@
 package ReversiGame;
 
+import static ReversiGame.Constants.*;
+
 /**
- * легкий вариант - это на каждом ходе он будет наибольшее количество фишек отсматривать
- * сложный - это то же самое, но на 3 хода вперед и отсматривать где больше выгода при каждом из ходов игрока
+ * Движок ReversiGame гарантирует правильную последовательность вызовов методов данного класса¡
  */
 public class PlayingField {
     private int[][] playingField;
     private boolean colorOfMove;
+
+    private Player player1;
+    private Player player2;  // Для режима игры игрок-игрок
+
+    private boolean gameStarted;
+
+    public boolean isGameStarted() {
+        return gameStarted;
+    }
 
     public int[][] getPlayingField() {
         return playingField;
@@ -16,17 +26,66 @@ public class PlayingField {
         return colorOfMove;
     }
 
+    private void clearPlayingField() {
+        playingField = new int[8][8];
+        for (int y = 0; y < 8; ++y) {
+            for (int x = 0; x < 8; ++x) {
+                playingField[y][x] = EMPTY_CELL;
+            }
+        }
+
+        playingField[3][3] = WHITE_CELL;
+        playingField[4][4] = WHITE_CELL;
+        playingField[3][4] = BLACK_CELL;
+        playingField[4][3] = BLACK_CELL;
+    }
+
     /**
      * Создает новую игру с чистым полем и инициализирует нужные переменные
      */
     public void createNewGame() {
+        clearPlayingField();
     }
 
     /**
      * Переводит двумерный массив из переменной playingField в двумерную строку
      */
     public String renderPlayingFieldIntoString() {
-        return "function 'renderPlayingFieldIntoString' hadn't implemented yet";
+        StringBuilder resultRenderedString = new StringBuilder(new String());
+        resultRenderedString.append('\t');
+
+        for (int horizontalPositionSymbol = (int)'A'; horizontalPositionSymbol < (int)'I'; ++horizontalPositionSymbol) {
+            resultRenderedString.append((char)horizontalPositionSymbol);
+            resultRenderedString.append('\t');
+        }
+
+        resultRenderedString.append('\n');
+
+        for (int y = 0; y < 8; ++y) {
+            resultRenderedString.append(y + 1);
+            for (int x = 0; x < 8; ++x) {
+                resultRenderedString.append('\t');
+                switch (playingField[y][x]) {
+                    case EMPTY_CELL:
+                        resultRenderedString.append(EMPTY_CELL_RENDER_SYMBOL);
+                        break;
+                    case WHITE_CELL:
+                        resultRenderedString.append(WHITE_CELL_RENDER_SYMBOL);
+                        break;
+                    case BLACK_CELL:
+                        resultRenderedString.append(BLACK_CELL_RENDER_SYMBOL);
+                        break;
+                    case POSSIBLE_MOVE_CELL:
+                        resultRenderedString.append(POSSIBLE_MOVE_RENDER_SYMBOL);
+                        break;
+                    default:
+                        resultRenderedString.append('?');
+                        break;
+                }
+            }
+            resultRenderedString.append('\n');
+        }
+        return resultRenderedString.toString();
     }
 
     /**
@@ -34,7 +93,7 @@ public class PlayingField {
      * @param pos_x позиция новой фишки по горизонтали
      * @param pos_y позиция новой фишки по вертикали
      * @return возвращает строку ошибки или константу SUCCESSFUL_FUNCTION_COMPLETION при
-     *  успешном ходе
+     *         успешном ходе
      */
     public String makeMoveOnPosition(int pos_x, int pos_y) {
         return "function 'makeMoveOnPosition' hadn't implemented yet";
