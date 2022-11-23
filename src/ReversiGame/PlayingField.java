@@ -10,7 +10,6 @@ import static ReversiGame.Constants.*;
 public class PlayingField {
     private int[][] playingField;
     private boolean colorOfMove;
-    private ArrayList<ArrayList<Integer>> possibleCellsToMove;
 
     private Player player1;
     private Player player2;  // Для режима игры игрок-игрок
@@ -49,27 +48,38 @@ public class PlayingField {
     public void createNewGame() {
         colorOfMove = REVERSI_BLACK_TURN;
         clearPlayingField();
-        possibleCellsToMove = MoveCalculator.getAllPossibleCellsToMove(playingField, colorOfMove);
     }
 
     /**
-     * Переводит двумерный массив из переменной playingField в двумерную строку
+     * Переводит двумерный массив из переменной playingField в двумерную строку,
+     * а также подставляет в строку возможные ходы
+     * @return Строка, содержащая поле с нумерацией строк и столбцов
      */
-    public static String renderPlayingFieldIntoString(int[][] playingField) {
+    public String renderPlayingFieldIntoString() {
         StringBuilder resultRenderedString = new StringBuilder();
         resultRenderedString.append('\t');
 
-        for (int horizontalPositionSymbol = (int)'A'; horizontalPositionSymbol < (int)'I'; ++horizontalPositionSymbol) {
-            resultRenderedString.append((char)horizontalPositionSymbol);
+        for (int horizontalPositionSymbol = 1; horizontalPositionSymbol < 9; ++horizontalPositionSymbol) {
+            resultRenderedString.append(horizontalPositionSymbol);
             resultRenderedString.append('\t');
         }
 
         resultRenderedString.append('\n');
 
+        ArrayList<ArrayList<Integer>> possibleCellsToMove = MoveCalculator.getAllPossibleCellsToMove(playingField, colorOfMove);
+
         for (int y = 0; y < 8; ++y) {
             resultRenderedString.append(y + 1);
             for (int x = 0; x < 8; ++x) {
                 resultRenderedString.append('\t');
+                ArrayList<Integer> arrayToFind = new ArrayList<>();
+                arrayToFind.add(x);
+                arrayToFind.add(y);
+
+                if (possibleCellsToMove.contains(arrayToFind)) {
+                    resultRenderedString.append(POSSIBLE_MOVE_RENDER_SYMBOL);
+                    continue;
+                }
                 switch (playingField[y][x]) {
                     case EMPTY_CELL:
                         resultRenderedString.append(EMPTY_CELL_RENDER_SYMBOL);
@@ -79,9 +89,6 @@ public class PlayingField {
                         break;
                     case BLACK_CELL:
                         resultRenderedString.append(BLACK_CELL_RENDER_SYMBOL);
-                        break;
-                    case POSSIBLE_MOVE_CELL:
-                        resultRenderedString.append(POSSIBLE_MOVE_RENDER_SYMBOL);
                         break;
                     default:
                         resultRenderedString.append('?');
@@ -95,20 +102,12 @@ public class PlayingField {
 
     /**
      * Ставит на позицию новую фишку цвета текущего хода и меняет ход.
-     * @param posX позиция новой фишки по горизонтали
-     * @param posY позиция новой фишки по вертикали
-     * @return возвращает строку ошибки или константу SUCCESSFUL_FUNCTION_COMPLETION при
-     *         успешном ходе
+     * @param positionX позиция новой фишки по горизонтали
+     * @param positionY позиция новой фишки по вертикали
      */
-    public String makeMoveOnPosition(int posX, int posY) {
-        for (int xDirection = -1; xDirection <= 1; ++xDirection) {
-            for (int yDirection = -1; yDirection <= 1; ++yDirection) {
-                if ((xDirection == yDirection) && (yDirection == 0)) {
-                    continue;
-                }
-            }
-        }
-
-        return "function 'makeMoveOnPosition' hadn't implemented yet";
+    public void makeMoveOnPosition(int positionX, int positionY) {
+        MoveCalculator.invertChipsDiagonally(playingField, colorOfMove, positionX, positionY);
+        playingField[positionY][positionX] = (colorOfMove == REVERSI_BLACK_TURN) ? BLACK_CELL : WHITE_CELL;
+        colorOfMove = !colorOfMove;
     }
 }

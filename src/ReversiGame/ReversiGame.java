@@ -14,6 +14,13 @@ public class ReversiGame {
         PlayingField playingField = new PlayingField();
         playingField.createNewGame();
 
+        System.out.println(playingField.renderPlayingFieldIntoString());
+        playingField.makeMoveOnPosition(5, 4);
+        System.out.println(playingField.renderPlayingFieldIntoString());
+        playingField.makeMoveOnPosition(3, 5);
+        System.out.println(playingField.renderPlayingFieldIntoString());
+        playingField.makeMoveOnPosition(2, 3);
+        System.out.println(playingField.renderPlayingFieldIntoString());
     }
 
 
