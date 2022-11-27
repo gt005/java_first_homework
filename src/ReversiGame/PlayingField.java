@@ -15,8 +15,8 @@ public class PlayingField {
 
     private int[] gameScore;
 
-    private Player player1;
-    private Player player2;  // Для режима игры игрок-игрок
+    private int blackBestScore;
+    private int whiteBestScore;
 
     private boolean gameStarted;
 
@@ -30,6 +30,7 @@ public class PlayingField {
 
     public void changeTurn() {
         colorOfMove = !colorOfMove;
+        possibleCellsToMove = MoveCalculator.getAllPossibleCellsToMove(playingField, colorOfMove);
     }
 
     public boolean isGameStarted() {
@@ -142,5 +143,15 @@ public class PlayingField {
         colorOfMove = !colorOfMove;
         possibleCellsToMove = MoveCalculator.getAllPossibleCellsToMove(playingField, colorOfMove);
         return SUCCESSFUL_FUNCTION_COMPLETION;
+    }
+
+    /**
+     *
+     * @param levelOfComplexity
+     */
+    public String calculateAndMakeComputerMove(boolean levelOfComplexity) {
+        int[] moveCoordinates = MoveCalculator.getBestMoveWithComplexity(levelOfComplexity, playingField, colorOfMove);
+
+        return makeMoveOnPosition(moveCoordinates[0], moveCoordinates[1]);
     }
 }

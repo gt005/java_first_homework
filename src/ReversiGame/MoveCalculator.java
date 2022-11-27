@@ -50,6 +50,42 @@ public final class MoveCalculator {
         return  (isPositionOnTheBoard(tmpXPosition, tmpYPosition) && playingField[tmpYPosition][tmpXPosition] == unionChipColor && !((tmpXPosition == positionX + xDirection) && (tmpYPosition == positionY + yDirection)));
     }
 
+    private static double calculateChipPossiblePoints(int[][] playingField,
+                                                   int positionX, int positionY,
+                                                   int enemyChipColor) {
+        double resultSum = 0;
+
+        if (positionX == 7 || positionX == 0) {
+            resultSum += 0.4;
+        }
+
+        if (positionY == 7 || positionY == 0) {
+            resultSum += 0.4;
+        }
+
+        for (int xDirection = -1; xDirection <= 1; ++xDirection) {
+            for (int yDirection = -1; yDirection <= 1; ++yDirection) {
+                if ((xDirection == yDirection) && (yDirection == 0)) {
+                    continue;
+                }
+                int tmpXPosition = positionX + xDirection;
+                int tmpYPosition = positionY + yDirection;
+
+                while (isPositionOnTheBoard(tmpXPosition, tmpYPosition) &&
+                        (playingField[tmpYPosition][tmpXPosition] == enemyChipColor)) {
+                    tmpYPosition += yDirection;
+                    tmpXPosition += xDirection;
+
+                    if (positionX == 7 || positionX == 0 || positionY == 7 || positionY == 0) {
+                        resultSum++;
+                    }
+                    resultSum++;
+                }
+            }
+        }
+        return resultSum;
+    }
+
      /**
      * Рассчитывает все ячейки, куда в данный момент может быть поставлена фишка игрока
      *
@@ -75,7 +111,6 @@ public final class MoveCalculator {
                 // просмотр во все стороны
                 for (int xDirection = -1; xDirection <= 1; ++xDirection) {
                     for (int yDirection = -1; yDirection <= 1; ++yDirection) {
-                        boolean test = false;
                         if (isSequenceCorrectByDirection(playingField, xAvailablePosition, yAvailablePosition, xDirection, yDirection, enemyChipColor, unionChipColor)) {
                             resultPossibleCells.add(new ArrayList<>(Arrays.asList(xAvailablePosition, yAvailablePosition)));
                             atLeastOneDirectionFound = true;
@@ -143,18 +178,37 @@ public final class MoveCalculator {
     /**
      * Находит вариант лучшего хода в текущий момент, играя на высокой сложности.
      * <p>
-     * На этой сложности анализируется количество LEVEL_OF_COMPLEXITY будущих возможных хода противника,
-     * и выдается вариант хода с наибольшим выигрышем по очкам.
      * <p>
-     * @param levelOfComplexity задает количество шагов, которое нужно просматривать наперед с оценкой
-     *                          возможных ответных ходов противника.
-     *                          0 означает отсутствие оценки возможных ответов противника.
+     * @param levelOfComplexity Один из двух уровней сложности компьютера. Хранится в константах.
      * @param playingField задает игровое поле, для которого рассчитывать ходы.
      * @param colorOfMove задает цвет фишек, для которых делать рассчеты.
-     * @return Массив из трех значений: позиция по x, позиция по y, куда нужно поставить фишку,
-     *         а также количество очков, на которое увеличется отрыв от противника.
+     * @return Массив из двух значений: позиция по x, позиция по y, куда нужно поставить фишку.
+     *          Или [-1, -1] если нет возможных ходов.
      */
-    public static int[] getBestMoveWithComplexity(int levelOfComplexity, int[][] playingField, boolean colorOfMove) {
-        return new int[2];
+    public static int[] getBestMoveWithComplexity(boolean levelOfComplexity, int[][] playingField, boolean colorOfMove) {
+        ArrayList<ArrayList<Integer>> allPossibleCellsToMove = getAllPossibleCellsToMove(playingField, colorOfMove);
+
+        if(allPossibleCellsToMove.isEmpty()) {
+            return new int[] {-1, -1};
+        }
+
+        int[] resultBest = new int[2];
+        double resultBestScore = -1.0;
+        double tmpScore;
+
+        for (int i = 0; i < allPossibleCellsToMove.size(); ++i) {
+            tmpScore = calculateChipPossiblePoints(
+                    playingField, allPossibleCellsToMove.get(i).get(0), allPossibleCellsToMove.get(i).get(1),
+                    colorOfMove == REVERSI_BLACK_TURN ? WHITE_CELL : BLACK_CELL
+                    );
+
+            if (tmpScore > resultBestScore) {
+                resultBest[0] = allPossibleCellsToMove.get(i).get(0);
+                resultBest[1] = allPossibleCellsToMove.get(i).get(1);
+                resultBestScore = tmpScore;
+            }
+        }
+
+        return resultBest;
     }
 }
