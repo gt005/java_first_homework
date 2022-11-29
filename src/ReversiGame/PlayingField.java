@@ -17,6 +17,7 @@ public class PlayingField {
     private ArrayList<ArrayList<Integer>> possibleCellsToMove;  // Хранит все возможные клетки для текущего хода
 
     private int[] gameScore;  // Хранит два значения: количество черных и белых фишек соответственно
+    private int[] previousGameScore;  // Хранит предыдущий счет для возможности отмены хода
 
     private int blackBestScore;  // Максимальное количество черных фишек в конце игры за сессию
     private int whiteBestScore;  // Максимальное количество черных фишек в конце игры за сессию
@@ -25,6 +26,7 @@ public class PlayingField {
         blackBestScore = 0;
         whiteBestScore = 0;
         previousPlayingField = null;
+        previousGameScore = null;
     }
 
     /**
@@ -173,15 +175,17 @@ public class PlayingField {
         }
 
         int[][] tmpPlayingField = null;
+        int[] tmpGameScore = null;
 
         if (!isComputerTurn) { // Нужно сохранять только если ходит человек
             tmpPlayingField = new int[8][];
             for (int i = 0; i < 8; ++i) {
                 tmpPlayingField[i] = Arrays.copyOf(playingField[i], 8);
             }
+            tmpGameScore = Arrays.copyOf(gameScore, 2);
         }
 
-        int scoreChange = MoveCalculator.invertChipsDiagonally(playingField, colorOfMove, positionX, positionY);
+        int scoreChange = MoveCalculator.invertEnemyClosingChips(playingField, colorOfMove, positionX, positionY);
         if (colorOfMove == REVERSI_BLACK_TURN) {
             gameScore[0] += scoreChange + 1;
             gameScore[1] -= scoreChange;
@@ -199,6 +203,8 @@ public class PlayingField {
             for (int i = 0; i < 8; ++i) {
                 previousPlayingField[i] = Arrays.copyOf(tmpPlayingField[i], 8);
             }
+
+            previousGameScore = Arrays.copyOf(tmpGameScore, 2);
         }
         return SUCCESSFUL_FUNCTION_COMPLETION;
     }
@@ -220,6 +226,9 @@ public class PlayingField {
 
         playingField = previousPlayingField;
         previousPlayingField = null;
+
+        gameScore = previousGameScore;
+        previousGameScore = null;
 
         possibleCellsToMove = MoveCalculator.getAllPossibleCellsToMove(playingField, colorOfMove);
 

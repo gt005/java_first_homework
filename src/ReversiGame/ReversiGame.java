@@ -47,7 +47,7 @@ public class ReversiGame {
 
         while (true) {
             // Информация о партии
-            System.out.printf("Счет:\nЧерные: %d\nБелые: %d\n\nХодят %s\n",
+            System.out.printf("Чтобы отменить ход, напишите \"cancel\" вместо координат хода.\nСчет:\nЧерные: %d\nБелые: %d\n\nХодят %s\n",
                     playingField.getGameScore()[0],
                     playingField.getGameScore()[1],
                     playingField.getColorOfMove() == REVERSI_BLACK_TURN ? "черные\n" : "белые\n"
@@ -126,7 +126,7 @@ public class ReversiGame {
                 playingField.setWhiteBestScore(playingField.getGameScore()[1]);
                 return true;
             }
-            System.out.printf("У %s небыло возможного хода, ход переходит к другому игроку\n", playingField.getColorOfMove() == REVERSI_BLACK_TURN ? "белых\n" : "черных\n");
+            System.out.printf("У %s не было возможного хода, ход переходит к другому игроку\n", playingField.getColorOfMove() == REVERSI_BLACK_TURN ? "белых" : "черных");
         }
         return false;
     }

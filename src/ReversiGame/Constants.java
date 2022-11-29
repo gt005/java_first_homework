@@ -18,7 +18,7 @@ public final class Constants {
     public static final boolean PLAYER_COMPUTER_GAME_MODE = false;
 
     public static final boolean EASY_COMPUTER_COMPLEXITY = true;
-    public static final boolean HARD_COMPUTER_COMPLEXITY = true;
+    public static final boolean HARD_COMPUTER_COMPLEXITY = false;
 
     public static  final String GAME_RULES = "В начале игры в центр доски выставляются 4 фишки: чёрные на d5 и e4, белые на d4 и e5.\n" +
             "Первый ход делают чёрные. Далее игроки ходят по очереди.\n" +

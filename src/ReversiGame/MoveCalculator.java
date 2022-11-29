@@ -62,6 +62,8 @@ public final class MoveCalculator {
     private static double calculateChipPossiblePoints(int[][] playingField,
                                                    int positionX, int positionY,
                                                    int enemyChipColor) {
+        int unionChipColor = (enemyChipColor == BLACK_CELL) ? WHITE_CELL : BLACK_CELL;
+
         double resultSum = 0;
 
         if (positionX == 7 || positionX == 0) {
@@ -74,7 +76,7 @@ public final class MoveCalculator {
 
         for (int xDirection = -1; xDirection <= 1; ++xDirection) {
             for (int yDirection = -1; yDirection <= 1; ++yDirection) {
-                if ((xDirection == yDirection) && (yDirection == 0)) {
+                if (isSequenceCorrectByDirection(playingField, positionX, positionY, xDirection, yDirection, enemyChipColor, unionChipColor)) {
                     continue;
                 }
                 int tmpXPosition = positionX + xDirection;
@@ -85,7 +87,7 @@ public final class MoveCalculator {
                     tmpYPosition += yDirection;
                     tmpXPosition += xDirection;
 
-                    if (positionX == 7 || positionX == 0 || positionY == 7 || positionY == 0) {
+                    if (tmpXPosition == 7 || tmpXPosition == 0 || tmpYPosition == 7 || tmpYPosition == 0) {
                         resultSum++;
                     }
                     resultSum++;
@@ -138,14 +140,14 @@ public final class MoveCalculator {
 
     /**
      * Переворачивает все фишки противника, которые подпадают под правила игры при установке фишки на позицию.
-     * При этом фишка по позиции не ставится.
+     * При этом фишка по позиции НЕ ставится.
      * @param playingField задает игровое поле, на котором инвертировать
      * @param colorOfMove задает цвет фишек игрока, чей ход
      * @param positionX позиция фишки по горизонтали
      * @param positionY позиция фишки по вертикали
      * @return количество перевернутых фишек
      */
-    public static int invertChipsDiagonally(int[][] playingField, boolean colorOfMove, int positionX, int positionY) {
+    public static int invertEnemyClosingChips(int[][] playingField, boolean colorOfMove, int positionX, int positionY) {
         int enemyChipColor = (colorOfMove == REVERSI_BLACK_TURN) ? WHITE_CELL : BLACK_CELL;
         int unionChipColor = (colorOfMove == REVERSI_BLACK_TURN) ? BLACK_CELL : WHITE_CELL;
 
@@ -188,18 +190,52 @@ public final class MoveCalculator {
         }
 
         int[] resultBest = new int[2];
-        double resultBestScore = -1.0;
+        double resultBestScore = -100.0;
         double tmpScore;
+        double nextMoveTmpScore;
+        double maxEnemyScore;
 
-        for (ArrayList<Integer> integers : allPossibleCellsToMove) {
+
+        for (ArrayList<Integer> possibleCell : allPossibleCellsToMove) {
+            maxEnemyScore = 0.0;
+
+            if (levelOfComplexity == HARD_COMPUTER_COMPLEXITY) {
+
+                int[][] nextMovePlayingField = new int[8][8];
+                for (int i = 0; i < 8; ++i) {
+                    nextMovePlayingField[i] = Arrays.copyOf(playingField[i], 8);
+                }
+
+                invertEnemyClosingChips(
+                        nextMovePlayingField, colorOfMove,
+                        possibleCell.get(0), possibleCell.get(1)
+                );
+
+                nextMovePlayingField[possibleCell.get(1)][possibleCell.get(0)] = (colorOfMove == REVERSI_BLACK_TURN) ? BLACK_CELL : WHITE_CELL;
+
+                ArrayList<ArrayList<Integer>> nextMoveAllPossibleCellsToMove = getAllPossibleCellsToMove(
+                        nextMovePlayingField, !colorOfMove
+                );
+
+                for (ArrayList<Integer> nextMovePossibleCell : nextMoveAllPossibleCellsToMove) {
+                    nextMoveTmpScore = calculateChipPossiblePoints(
+                            nextMovePlayingField, nextMovePossibleCell.get(0), nextMovePossibleCell.get(1),
+                            colorOfMove == REVERSI_BLACK_TURN ? BLACK_CELL : WHITE_CELL  // enemyColor
+                    );
+                    if (nextMoveTmpScore > maxEnemyScore) {
+                        maxEnemyScore = nextMoveTmpScore;
+                    }
+                }
+            }
+            
             tmpScore = calculateChipPossiblePoints(
-                    playingField, integers.get(0), integers.get(1),
+                    playingField, possibleCell.get(0), possibleCell.get(1),
                     colorOfMove == REVERSI_BLACK_TURN ? WHITE_CELL : BLACK_CELL
-            );
+            ) - maxEnemyScore;
 
             if (tmpScore > resultBestScore) {
-                resultBest[0] = integers.get(0);
-                resultBest[1] = integers.get(1);
+                resultBest[0] = possibleCell.get(0);
+                resultBest[1] = possibleCell.get(1);
                 resultBestScore = tmpScore;
             }
         }
