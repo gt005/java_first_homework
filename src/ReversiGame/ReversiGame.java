@@ -1,79 +1,45 @@
 package ReversiGame;
 
-import java.util.Objects;
 import java.util.Scanner;
 
 import static ReversiGame.Constants.*;
 
 /**
- * Управляет ходом игры, взаимодействуя с пользователем, взаимодействует с классами Player и ReversiBoard
+ * Управляет ходом игры, взаимодействуя с пользователем
  */
 public class ReversiGame {
 
     private static final Scanner scanner = new Scanner(System.in);
     private boolean gameMode;  // Игрок - игрок или компьютер - игрок
     private boolean computerComplexity;
+    private PlayingField playingField;
 
     /**
      * Отслеживает начало новых игр и выход из игры. При первом запуске печатает правила.
      */
     public void startGame() {
-
-        PlayingField playingField = new PlayingField();
+        this.playingField = new PlayingField();
 
         System.out.println(GAME_RULES);
-        String userCommand;
-
-        boolean rightCommandFlag = false;
-        while (!rightCommandFlag) {
-            userCommand = scanner.nextLine();
-
-            if (userCommand.matches("^[1-9]\\d*$")) {
-                switch (Integer.parseInt(userCommand)) {
-                    case 1:
-                        gameMode = PLAYER_COMPUTER_GAME_MODE;
-                        rightCommandFlag = true;
-                        computerComplexity = EASY_COMPUTER_COMPLEXITY;
-                        break;
-                    case 2:
-                        gameMode = PLAYER_COMPUTER_GAME_MODE;
-                        rightCommandFlag = true;
-                        computerComplexity = HARD_COMPUTER_COMPLEXITY;
-                        break;
-                    case 3:
-                        gameMode = PLAYER_PLAYER_GAME_MODE;
-                        rightCommandFlag = true;
-                        break;
-                    default:
-                        System.out.println("Введено неверное число\n");
-                        System.out.println(GAME_RULES);
-                        break;
-                }
-            } else {
-                System.out.println("Введено неверное число\n");
-                System.out.println(GAME_RULES);
-            }
-        }
-
-        System.out.println("Чтобы сделать ход в игре, напишите два целых числа: номер столбца и номер строчки хода соответственно.\nЧтобы начать новую игру, напишите start. Чтобы выйти из игры, напишите quit\n");
 
         while (true) {
-            userCommand = scanner.nextLine();
-            switch (userCommand) {
-                case "start":
-                    playingField.createNewGame();
-                    communicateWithUser(playingField);
-                    break;
-                case "quit":
-                    return;
-                default:
-                    System.out.println("Неизвестная команда, Чтобы начать новую игру, напишите start. Чтобы выйти из игры, напишите quit\n");
-                    break;
+
+            if (isRequiredToStartGame()) {
+                System.out.println(POSSIBLE_GAME_MODES_SELECTION_DESCRIPTION);
+                getGameModeFromUser();
+
+                playingField.createNewGame();
+                communicateWithUser();
+            } else {
+                break;
             }
         }
     }
 
-    private void communicateWithUser(PlayingField playingField) {
+    /**
+     * Выполняет ходы игроков по координатам. Посылает команды на ход в PlayingField.
+     */
+    private void communicateWithUser() {
         int xCoordinate;
         int yCoordinate;
         // массив из двух координат
@@ -90,12 +56,9 @@ public class ReversiGame {
 
             // Валидация координат хода, которые ввел пользователь
             if (this.gameMode == PLAYER_COMPUTER_GAME_MODE && playingField.getColorOfMove() == REVERSI_WHITE_TURN) {
-                String computerMoveResult = playingField.calculateAndMakeComputerMove(this.gameMode);
-//                if (!SUCCESSFUL_FUNCTION_COMPLETION.equals(computerMoveResult)) {
-//                    System.out.println(computerMoveResult);
-//                    playingField.changeTurn();
-//                }
-                if (isGameEnded(playingField)) {
+                playingField.calculateAndMakeComputerMove(computerComplexity);
+
+                if (isGameEnded()) {
                     System.out.println(playingField.renderPlayingFieldIntoString());
                     return;
                 }
@@ -108,6 +71,17 @@ public class ReversiGame {
                     !(userCoordinatesInput[0].matches("^[1-9]\\d*$") &&
                             userCoordinatesInput[1].matches("^[1-9]\\d*$"))
                     )) {
+
+                if (userCoordinatesInput.length == 1 && "cancel".equals(userCoordinatesInput[0])) {
+                    String errorString = playingField.cancelLastPlayerMove(this.gameMode);
+
+                    if (!SUCCESSFUL_FUNCTION_COMPLETION.equals(errorString)) {
+                        System.out.println(errorString);
+                    }
+
+                    continue;
+                }
+
                 System.out.println("Некорректная команда, введите две координаты\n");
                 continue;
             }
@@ -115,12 +89,12 @@ public class ReversiGame {
             xCoordinate = Integer.parseInt(userCoordinatesInput[0]) - 1;
             yCoordinate = Integer.parseInt(userCoordinatesInput[1]) - 1;
 
-            String moveErrorMessage = playingField.makeMoveOnPosition(xCoordinate, yCoordinate);
+            String moveErrorMessage = playingField.makeMoveOnPosition(xCoordinate, yCoordinate, false);
             if (!SUCCESSFUL_FUNCTION_COMPLETION.equals(moveErrorMessage)) {
                 System.out.println(moveErrorMessage);
             }
 
-            if (isGameEnded(playingField)) {
+            if (isGameEnded()) {
                 System.out.println(playingField.renderPlayingFieldIntoString());
                 return;
             }
@@ -128,7 +102,12 @@ public class ReversiGame {
         }
     }
 
-    private boolean isGameEnded(PlayingField playingField) {
+    /**
+     * Проверяет, есть ли возможные ходы у обеих сторон. Если ход есть только у одной стороны, функция меняет ход,
+     * оповещает об этом пользователя и продолжает игры. Если игра закончены, выводит результат партии.
+     * @return true, если игры окончена и ни одна сторона не может ходить, иначе false.
+     */
+    private boolean isGameEnded() {
         if (!playingField.checkPossibilityOfMove()) {
             playingField.changeTurn();
             if (!playingField.checkPossibilityOfMove()) {
@@ -140,12 +119,82 @@ public class ReversiGame {
                 } else {
                     gameResult = "Ничья";
                 }
-                System.out.printf("Игра окончена!\n%s со счетом %d : %d\nЧтобы начать новую игру, напишите start. Чтобы выйти из игры, напишите quit\n",
+                System.out.printf("Игра окончена!\n%s со счетом %d : %d\n" + USER_REMOTE_GAME_COMMANDS,
                         gameResult, playingField.getGameScore()[0], playingField.getGameScore()[1]);
+
+                playingField.setBlackBestScore(playingField.getGameScore()[0]);
+                playingField.setWhiteBestScore(playingField.getGameScore()[1]);
                 return true;
             }
             System.out.printf("У %s небыло возможного хода, ход переходит к другому игроку\n", playingField.getColorOfMove() == REVERSI_BLACK_TURN ? "белых\n" : "черных\n");
         }
         return false;
     }
+
+    /**
+     * Ожидает получения информации о запуске новой игры или выхода из нее.
+     * @return true, если пользователь требует начать игру, иначе false.
+     */
+    private boolean isRequiredToStartGame() {
+        String userCommand;
+
+        System.out.println("Чтобы сделать ход в игре, напишите два целых числа:" +
+                " номер столбца и номер строчки хода соответственно.\n" + USER_REMOTE_GAME_COMMANDS);
+
+        while (true) {
+            userCommand = scanner.nextLine();
+            switch (userCommand) {
+                case "start":
+                    return true;
+                case "quit":
+                    return false;
+                case "score":
+                    if (playingField.getBlackBestScore() != 0) {
+                        System.out.printf("Лучший счет у Черных - %d, у Белых - %d\n" + USER_REMOTE_GAME_COMMANDS,
+                                playingField.getBlackBestScore(), playingField.getWhiteBestScore());
+                    } else {
+                        System.out.println("Еще не было ни одной игры, поэтому лучшего счета нет.\n" + USER_REMOTE_GAME_COMMANDS);
+                    }
+                    break;
+                default:
+                    System.out.println(USER_REMOTE_GAME_COMMANDS);
+                    break;
+            }
+        }
+    }
+
+    /**
+     * Ожидает получения информации о режиме игры и устанавливает этот режим для данного класса.
+     */
+    private void getGameModeFromUser() {
+        String userCommand;
+
+        while (true) {
+            userCommand = scanner.nextLine();
+
+            if (userCommand.matches("^[1-9]\\d*$")) {
+                switch (Integer.parseInt(userCommand)) {
+                    case 1:
+                        gameMode = PLAYER_COMPUTER_GAME_MODE;
+                        computerComplexity = EASY_COMPUTER_COMPLEXITY;
+                        return;
+                    case 2:
+                        gameMode = PLAYER_COMPUTER_GAME_MODE;
+                        computerComplexity = HARD_COMPUTER_COMPLEXITY;
+                        return;
+                    case 3:
+                        gameMode = PLAYER_PLAYER_GAME_MODE;
+                        return;
+                    default:
+                        System.out.println("Введено неверное число\n");
+                        System.out.println(POSSIBLE_GAME_MODES_SELECTION_DESCRIPTION);
+                        break;
+                }
+            } else {
+                System.out.println("Введено неверное число\n");
+                System.out.println(POSSIBLE_GAME_MODES_SELECTION_DESCRIPTION);
+            }
+        }
+    }
+
 }

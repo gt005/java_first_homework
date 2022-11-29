@@ -17,6 +17,7 @@ public final class MoveCalculator {
     }
 
     private MoveCalculator() {
+        // Закрываем класс на создание
     }
 
     /**
@@ -50,6 +51,14 @@ public final class MoveCalculator {
         return  (isPositionOnTheBoard(tmpXPosition, tmpYPosition) && playingField[tmpYPosition][tmpXPosition] == unionChipColor && !((tmpXPosition == positionX + xDirection) && (tmpYPosition == positionY + yDirection)));
     }
 
+    /**
+     * Рассчитывает по формуле количество поинтов, которое можно получить, если сходить по этим координатам.
+     * @param playingField Игровое поле, на котором рассчитывать.
+     * @param positionX Позиция новой фишки по горизонтали
+     * @param positionY Позиция новой фишки по вертикали
+     * @param enemyChipColor Цвет вражеской фишки
+     * @return Просчитанное по формуле число поинтов
+     */
     private static double calculateChipPossiblePoints(int[][] playingField,
                                                    int positionX, int positionY,
                                                    int enemyChipColor) {
@@ -94,7 +103,7 @@ public final class MoveCalculator {
      * @return двумерный массив из координат возможных фишек
      */
     public static ArrayList<ArrayList<Integer>> getAllPossibleCellsToMove(int[][] playingField, boolean colorOfMove) {
-        ArrayList<ArrayList<Integer>> resultPossibleCells = new ArrayList<ArrayList<Integer>>();
+        ArrayList<ArrayList<Integer>> resultPossibleCells = new ArrayList<>();
 
         int enemyChipColor = (colorOfMove == REVERSI_BLACK_TURN) ? WHITE_CELL : BLACK_CELL;
         int unionChipColor = (colorOfMove == REVERSI_BLACK_TURN) ? BLACK_CELL : WHITE_CELL;
@@ -128,7 +137,8 @@ public final class MoveCalculator {
     }
 
     /**
-     * Переворачивает все фишки противника, которые подпадают под правила игры при установке фишки на позицию
+     * Переворачивает все фишки противника, которые подпадают под правила игры при установке фишки на позицию.
+     * При этом фишка по позиции не ставится.
      * @param playingField задает игровое поле, на котором инвертировать
      * @param colorOfMove задает цвет фишек игрока, чей ход
      * @param positionX позиция фишки по горизонтали
@@ -163,22 +173,7 @@ public final class MoveCalculator {
     }
 
     /**
-     * Получить количество очков, которое прибавится при размещении фишки на конкретной позиции.
-     * Важно: Валидация данных должна происходить извне.
-     * @param playingField задает игровое поле, для которого посчитать ход
-     * @param colorOfMove  указывает на то, чей ход
-     * @param positionX    позиция фишки, которую поставить по горизонтали
-     * @param positionY    позиция фишки, которую поставить по вертикали
-     * @return
-     */
-    private int getIncreaseInPointsOfCertainMove(int[][] playingField, boolean colorOfMove, int positionX, int positionY) {
-        return -1;
-    }
-
-    /**
-     * Находит вариант лучшего хода в текущий момент, играя на высокой сложности.
-     * <p>
-     * <p>
+     * Находит вариант лучшего хода в текущий момент, учитывая выставленную сложность.
      * @param levelOfComplexity Один из двух уровней сложности компьютера. Хранится в константах.
      * @param playingField задает игровое поле, для которого рассчитывать ходы.
      * @param colorOfMove задает цвет фишек, для которых делать рассчеты.
@@ -196,15 +191,15 @@ public final class MoveCalculator {
         double resultBestScore = -1.0;
         double tmpScore;
 
-        for (int i = 0; i < allPossibleCellsToMove.size(); ++i) {
+        for (ArrayList<Integer> integers : allPossibleCellsToMove) {
             tmpScore = calculateChipPossiblePoints(
-                    playingField, allPossibleCellsToMove.get(i).get(0), allPossibleCellsToMove.get(i).get(1),
+                    playingField, integers.get(0), integers.get(1),
                     colorOfMove == REVERSI_BLACK_TURN ? WHITE_CELL : BLACK_CELL
-                    );
+            );
 
             if (tmpScore > resultBestScore) {
-                resultBest[0] = allPossibleCellsToMove.get(i).get(0);
-                resultBest[1] = allPossibleCellsToMove.get(i).get(1);
+                resultBest[0] = integers.get(0);
+                resultBest[1] = integers.get(1);
                 resultBestScore = tmpScore;
             }
         }
