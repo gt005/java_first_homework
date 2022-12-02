@@ -25,8 +25,6 @@ public class PlayingField {
     {
         blackBestScore = 0;
         whiteBestScore = 0;
-        previousPlayingField = null;
-        previousGameScore = null;
     }
 
     /**
@@ -109,6 +107,8 @@ public class PlayingField {
         colorOfMove = REVERSI_BLACK_TURN;
         clearPlayingField();
         gameScore = new int[]{2, 2};
+        previousPlayingField = null;
+        previousGameScore = null;
         possibleCellsToMove = MoveCalculator.getAllPossibleCellsToMove(playingField, colorOfMove);
     }
 
