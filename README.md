@@ -6,3 +6,5 @@ $ cd src/
 $ javac TestClass.java
 $ java TestClass
 ```
+
+Выполнены все условия реализации.
